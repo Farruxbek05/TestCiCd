@@ -1,4 +1,4 @@
-name: Build, Test and Deploy
+name: Build, Test, and Deploy
 
 on:
   push:
@@ -10,16 +10,18 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Setup .Net 8
+      - name: Setup .NET
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: "8.0.x"
+          dotnet-version: '8.0.x'
 
       - name: Restore dependencies
+        working-directory: TestDeploy
         run: dotnet restore TestDeploy.sln
 
-      - name: Build
-        run: dotnet build --configuration Release
+      - name: Build project
+        working-directory: TestDeploy
+        run: dotnet build TestDeploy.sln --configuration Release
