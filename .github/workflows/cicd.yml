@@ -25,3 +25,24 @@ jobs:
       - name: Build project
         working-directory: TestDeploy
         run: dotnet build TestDeploy.sln --configuration Release
+
+  test:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore dependencies
+        working-directory: TestDeploy
+        run: dotnet restore TestDeploy.sln
+
+      - name: Run tests
+        working-directory: TestDeploy
+        run: dotnet test TestDeploy.sln --configuration Release
