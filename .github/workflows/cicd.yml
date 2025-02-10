@@ -46,3 +46,29 @@ jobs:
       - name: Run tests
         working-directory: TestDeploy
         run: dotnet test TestDeploy.sln --configuration Release
+
+
+  dockerize:
+    needs: test
+    runs-on: ubuntu-latest
+    env:
+      Docker_Username: ${{ secrets.Docker_Username }}
+      Docker_Password: ${{ secrets.Docker_Password }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Build Docker image 
+        run: docker build -t $Docker_Username/testdeploy -f TestDeploy/Dockerfile .
+
+      - name: Login to Docker Hub
+        run: echo "$Docker_Password" | docker login -u "$Docker_Username" --password-stdin
+
+      - name: Push Docker image
+        run: docker push $Docker_Username/testdeploy
+
+
+         
+
+        
