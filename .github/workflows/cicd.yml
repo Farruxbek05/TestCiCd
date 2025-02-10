@@ -63,13 +63,7 @@ jobs:
         run: echo "$Docker_Password" | docker login -u "$Docker_Username" --password-stdin
 
       - name: Build Docker image
-        working-directory: TestDeploy
-        run: docker buildx build --platform linux/amd64 -t $Docker_Username/testdeploy --load -f Dockerfile .
+        run: docker buildx build --platform linux/amd64 -t $Docker_Username/testdeploy --load -f TestDeploy/Dockerfile TestDeploy
 
       - name: Push Docker image
         run: docker push $Docker_Username/testdeploy
-
-
-      - name: Push Docker image
-        run: docker push $Docker_Username/testdeploy
-
