@@ -58,12 +58,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Build Docker image
-        run: docker build -t $Docker_Username/testdeploy -f TestDeploy/Dockerfile .
-
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
 
       - name: Login to Docker Hub
         run: echo "$Docker_Password" | docker login -u "$Docker_Username" --password-stdin
+
+      - name: Build Docker image
+        run: docker buildx build --platform linux/amd64 -t $Docker_Username/testdeploy -f TestDeploy/Dockerfile --load .
 
       - name: Push Docker image
         run: docker push $Docker_Username/testdeploy
