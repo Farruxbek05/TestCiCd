@@ -64,8 +64,10 @@ jobs:
       - name: Login to Docker Hub
         run: echo "$Docker_Password" | docker login -u "$Docker_Username" --password-stdin
 
-      - name: Build Docker image
-        run: docker buildx build --platform linux/amd64 -t $Docker_Username/testdeploy -f TestDeploy/Dockerfile --load .
+       - name: Build Docker image
+         working-directory: TestDeploy
+         run: docker buildx build --platform linux/amd64 -t $Docker_Username/testdeploy --load .
+
 
       - name: Push Docker image
         run: docker push $Docker_Username/testdeploy
