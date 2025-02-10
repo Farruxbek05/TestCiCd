@@ -45,25 +45,52 @@ jobs:
         working-directory: TestDeploy
         run: dotnet test TestDeploy.sln --configuration Release
 
-  dockerize:
+  deploy:
     needs: test
     runs-on: ubuntu-latest
-    env:
-      Docker_Username: ${{ secrets.Docker_Username }}
-      Docker_Password: ${{ secrets.Docker_Password }}
-
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+      - name: Copy project files to remote server
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USER }}
+          password: ${{ secrets.SERVER_PASSWORD }}
+          port: 22
+          source: "."
+          target: "/${{ secrets.SERVER_USER }}/my_project"
 
-      - name: Login to Docker Hub
-        run: echo "$Docker_Password" | docker login -u "$Docker_Username" --password-stdin
+      - name: Deploy application on remote server
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USER }}
+          password: ${{ secrets.SERVER_PASSWORD }}
+          port: 22
+          script: |
+            # Kode nusxa ko'chirilgan katalogga o'tamiz; agar Dockerfile TestDeploy papkasida bo'lsa:
+            cd /${{ secrets.SERVER_USER }}/my_project/TestDeploy
 
-      - name: Build Docker image
-        run: docker buildx build --platform linux/amd64 -t $Docker_Username/testdeploy --load -f TestDeploy/Dockerfile TestDeploy
+            echo "Docker imij qurilmoqda..."
+            docker build -t testdeploy .
 
-      - name: Push Docker image
-        run: docker push $Docker_Username/testdeploy
+            echo "Agar mavjud bo'lsa, eski konteyner to'xtatilmoqda..."
+            docker stop testdeploy || true
+            docker rm testdeploy || true
+
+            echo "Yangi konteyner ishga tushirilmoqda..."
+            docker run -d -p 5000:5000 --name testdeploy testdeploy
+
+            echo "Konteyner ishga tushishini kutamiz..."
+            sleep 5
+
+            if ! docker ps -q -f name=testdeploy; then
+              echo "❌ Konteyner ishga tushmadi"
+              docker logs testdeploy
+              exit 1
+            fi
+
+            echo "✅ Konteyner muvaffaqiyatli ishga tushdi"
+            docker ps
