@@ -59,7 +59,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Build Docker image 
+      - name: Install Docker Buildx (Optional)
+        run: docker buildx create --use || true
+
+      - name: Build Docker image (standart)
         run: docker build -t $Docker_Username/testdeploy -f TestDeploy/Dockerfile .
 
       - name: Login to Docker Hub
@@ -67,6 +70,7 @@ jobs:
 
       - name: Push Docker image
         run: docker push $Docker_Username/testdeploy
+
 
 
 
