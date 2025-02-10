@@ -66,11 +66,8 @@ jobs:
 
       - name: Build Docker image
         working-directory: TestDeploy
-        run: docker buildx build --platform linux/amd64 -t $Docker_Username/testdeploy --load .
+        run: docker buildx build --platform linux/amd64 -t $Docker_Username/testdeploy --load -f Dockerfile .
 
       - name: Push Docker image
         run: docker push $Docker_Username/testdeploy
 
-
-      - name: Push Docker image
-        run: docker push $Docker_Username/testdeploy
