@@ -21,7 +21,8 @@ public class MathServiceTests
         // Given
         var mathService = services.GetRequiredService<IMathService>();
         var a = 1;
-        var b = 2;
+        var b = 2; 
+
 
         // When
         var result = await mathService.AddAsync(a, b, CancellationToken.None);
